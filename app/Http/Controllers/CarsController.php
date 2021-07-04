@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Car;
+use App\Models\Product;
 
 class CarsController extends Controller
 {
@@ -14,10 +15,9 @@ class CarsController extends Controller
      */
     public function index()
     {
-        //SELECT * FROM cars
         $cars = Car::all();
 
-        return view('cars.index',[
+        return view('cars.index', [
             'cars' => $cars
         ]);
     }
@@ -40,11 +40,12 @@ class CarsController extends Controller
      */
     public function store(Request $request)
     {
-        // $car = new Car;
-        // $car->name = $request->input('name');
-        // $car->founded = $request->input('founded');
-        // $car->description = $request->input('description');
-        // $car->save();
+        $request->validate([
+            'name' => 'required|unique:cars',
+            'founded' => 'required|integer|min:0|max:2021',
+            'description' => 'required'
+        ]);
+
         $car = Car::create([
             'name' => $request->input('name'),
             'founded' => $request->input('founded'),
@@ -62,7 +63,12 @@ class CarsController extends Controller
      */
     public function show($id)
     {
-        //
+        $car = Car::find($id);
+
+        $products = Product::find($id);
+
+        print_r($products);
+        return view('cars.show')->with('car',$car);
     }
 
     /**
@@ -73,7 +79,9 @@ class CarsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $car = Car::find($id);
+
+        return view('cars.edit')->with('car', $car);
     }
 
     /**
@@ -85,7 +93,14 @@ class CarsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        
+        $car = Car::where('id', $id)
+            ->update([
+                'name' => $request->input('name'),
+                'founded' => $request->input('founded'),
+                'description' => $request->input('description')
+        ]);
+        return redirect('/cars');
     }
 
     /**
@@ -94,8 +109,10 @@ class CarsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Car $car)
     {
-        //
+        $car->delete();
+
+        return redirect('/cars');
     }
 }
