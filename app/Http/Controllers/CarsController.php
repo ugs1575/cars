@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\Product;
+use App\Rules\Uppercase;
+use App\Http\Requests\CreateValidationRequest;
 
 class CarsController extends Controller
 {
@@ -40,16 +42,37 @@ class CarsController extends Controller
      */
     public function store(Request $request)
     {
+        //methods we can use on $request
+        //guessExtension()
+        //getMimeType()
+        //store()
+        //asStore()
+        //storePublicly()
+        //move()
+        //getClientOriginalName()
+        //getClientMimeType()
+        //guessClientExtension()
+        //getSize()
+        //getError()
+        //isValid()
+
         $request->validate([
-            'name' => 'required|unique:cars',
+            'name' => 'required',
             'founded' => 'required|integer|min:0|max:2021',
-            'description' => 'required'
+            'description' => 'required',
+            'image' => 'required|mimes:jpg,png,jpeg|max:5048'
         ]);
+
+        $newImageName = time() . '-' . $request->name . '.' .
+        $request->image->extension();
+
+        $request->image->move(public_path('images'), $newImageName);
 
         $car = Car::create([
             'name' => $request->input('name'),
             'founded' => $request->input('founded'),
-            'description' => $request->input('description')
+            'description' => $request->input('description'),
+            'image_path' => $newImageName
         ]);
         
         return redirect('/cars');
@@ -67,7 +90,6 @@ class CarsController extends Controller
 
         $products = Product::find($id);
 
-        print_r($products);
         return view('cars.show')->with('car',$car);
     }
 
@@ -91,8 +113,9 @@ class CarsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CreateValidationRequest $request, $id)
     {
+        $request->validated();
         
         $car = Car::where('id', $id)
             ->update([

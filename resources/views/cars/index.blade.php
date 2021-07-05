@@ -21,7 +21,7 @@
             <div class="float-right">
                 <a 
                     class="border-b-2 pb-2 border-dotted italic text-green-500"  
-                    href="cars//edit">
+                    href="cars/edit">
                     Edit &rarr;
                 </a>
 
